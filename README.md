@@ -1,3 +1,0 @@
-# qunjuju
-#MyLover
-muamuamua
