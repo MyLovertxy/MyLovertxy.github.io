@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>最懂你的播放器</title>
+		<!--使用css修饰效果播放器-->
+		<style>
+			/*准备工作 ：取消所有标签内外边距，*表示任意标签，优先级最低*/
+			*{
+				margin: 0px;
+				padding: 0px;
+			}
+			/*页面网格线，明确定位、宽高*/
+			div{
+				border: 0px solid red;
+			}
+			/*设置背景图片*/
+			body{
+				background-image: url(img/shuimo.jpg);
+			}
+			/*整体效果*/
+			#total{
+				width: 500px;
+				height: 600px;
+				margin: auto;
+			}
+			/*设置CD封面*/
+			#cd{
+				width: 500px;
+				height: 500px;
+				/*
+				 弧形/圆角:设置圆角弧线半径--弧度，
+				 * */
+				border-radius: 250px;
+				background-image: url(img/许嵩.jpg);
+				/*使用图片填充整个背景*/
+				background-size: 100%;
+				/**形成立体感？使用阴影
+				 * arg0和arg1:表示x,y轴值，正负值，表示阴影在标签上下左右四个方向,10px,10px右方和下方
+				 * arg2:渐变宽度，通过设置渐变宽度从而形成阴影，通过阴影形成立体
+				 * arg3:颜色，阴影颜色
+				 * 
+				 */
+				box-shadow: 0px 0px 20px darksalmon;
+				/**
+				 * 旋转:transform是css3.0属性，从2D效果3D转换
+				 * rotate旋转，角度值deg
+				 * 持续性旋转:使用js周期函数setInterval()
+				 */
+				/*transform: rotate(180deg);*/
+			}
+			/*设置CD空白圆圈*/
+			#blank{
+				position: relative;
+				left: 225px;
+				top: 225px;
+				height: 50px;
+				width: 50px;
+				border: 1px solid darkgray;
+				/*背景色*/
+				background-color: white;
+				/*切圆和阴影*/
+				border-radius: 25px;
+				box-shadow: 0px 0px 20px darksalmon;
+							
+			}
+			/*设置按钮*/
+			#left{
+				background-image: url(img/l.jpg);
+			}
+			#play{
+				background-image: url(img/s.jpg);
+			}
+			#right{
+				background-image: url(img/r.jpg);
+			}
+			/*设置按钮位置*/
+			#btn{
+				width: 500px;
+				height: 50px;
+				margin: auto;
+				margin-top: 20px;
+			}
+			/*统一设置按钮样式*/
+			.button{
+				width: 50px;
+				height: 50px;
+				/*
+				 div块级元素，独占一行。改变成为行内元素，方式:a.dispaly="inline",b.使用浮动float
+				 * */
+				float: left;
+				border-radius: 25px;
+				background-size: 100%;
+				margin-left: 85px;
+			}
+			/*使用css伪样式*/
+			.button:hover{
+				box-shadow: 0px 0px 20px #FF0000;
+			}
+		</style>
+	</head>
+	<body>
+		<!--1.使用html构建页面-->
+		<!--整个播放器-->
+		<div id="total">
+			<!--上部CD封面-->
+			<div id="cd">
+				<!--CD中间空白圆圈-->
+				<div id="blank"></div>
+			</div>
+			<!--下部操作按钮-->
+			<div id="btn">
+				<div id="left" class="button" onclick="previous();"></div>
+				<div id="play" class="button" onclick="play();"></div>
+				<div id="right" class="button" onclick="next();"></div>
+			</div>
+			<!--播放器:H5的audio标签-->
+			<audio id="player" src="mp3/1.mp3"></audio>
+		</div>
+		<!--3.js代码实现播放、暂停、上一首、下一首功能-->
+		<script>
+			var jd=0;//角度
+			var ds;//周期函数引用、旋转或者取消旋转
+			var pd=0;//播放或暂停 0表示暂停,1表示播放
+			var jz=0;//加载音乐
+			var mc=1;//歌曲文件编号、使用变量值与歌曲文件名形成关联，达到效果通过改变变量值从而修改歌曲播放源文件名
+			//获取auido
+			var music=document.getElementById("player");
+			//播放和暂停 ，比如:播放，CD旋转、歌曲播放、按钮改变
+			function play(){
+				if(pd==0){//暂停中，播放
+					pd=1;//修改状态码
+					if(jz==0){//是否加载
+						music.src="mp3/"+mc+".mp3";
+						music.load();//加载歌曲源文件
+						jz=1;//加载完成
+					}
+					music.play();//播放歌曲
+					//修改图标位暂停
+					document.getElementById("play").style.backgroundImage="url(img/p.jpg)";
+					//旋转
+					ds=setInterval(function aaa(){
+						jd+=0.05;
+						document.getElementById("cd").style.transform="rotate("+jd+"deg)";
+					},1);//表示每隔1毫秒执行aaa函数
+				}else{//播放中，暂停
+					pd=0;
+					music.pause();//暂停
+					clearInterval(ds);//清除周期函数，停止旋转
+					document.getElementById("play").style.backgroundImage="url(img/s.jpg)";
+				}
+			}
+			//下一首
+			function next(){
+				if(pd==1){//播放中才能切换歌曲
+					mc++;
+					if(mc>4){//循环播放
+						mc=1;
+					}
+					music.pause();//暂停
+					music.src="mp3/"+mc+".mp3";//修改源文件
+					music.load();//重新加载
+					music.play();
+				}
+			}
+			//上一首
+			function previous(){
+				if(pd==1){
+					mc--;
+					if(mc<1){
+						mc=4;
+					}
+					music.pause();//暂停
+					music.src="mp3/"+mc+".mp3";//修改源文件
+					music.load();//重新加载
+					music.play();
+				}
+			}
+		</script>
+	</body>
+</html>
